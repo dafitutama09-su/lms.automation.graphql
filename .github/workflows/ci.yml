@@ -43,17 +43,19 @@ jobs:
       - name: Extract Test Results
         if: always()
         run: |
-          RESULT_FILE=$(find . -name "testng-results.xml" | head -1)
+          RESULT_FILES=$(find build/test-results/test -name "*.xml")
 
-          if [ -f "$RESULT_FILE" ]; then
-            PASS_COUNT=$(grep -o 'status="PASS"' $RESULT_FILE | wc -l)
-            FAIL_COUNT=$(grep -o 'status="FAIL"' $RESULT_FILE | wc -l)
-            FAIL_TESTS=$(grep 'status="FAIL"' $RESULT_FILE | sed -n 's/.*name="\([^"]*\)".*/\1/p' | tr '\n' ', ')
-          else
-            PASS_COUNT=0
-            FAIL_COUNT=0
-            FAIL_TESTS="No results file found"
+          if [ -z "$RESULT_FILES" ]; then
+            echo "PASS_COUNT=0" >> $GITHUB_ENV
+            echo "FAIL_COUNT=0" >> $GITHUB_ENV
+            echo "FAIL_TESTS=No results file found" >> $GITHUB_ENV
+            exit 0
           fi
+
+          PASS_COUNT=$(grep -h 'testsuite' $RESULT_FILES | sed -n 's/.*tests="\([0-9]*\)".*/\1/p' | awk '{sum+=$1} END {print sum}')
+          FAIL_COUNT=$(grep -h 'testsuite' $RESULT_FILES | sed -n 's/.*failures="\([0-9]*\)".*/\1/p' | awk '{sum+=$1} END {print sum}')
+
+          FAIL_TESTS=$(grep -h '<testcase' $RESULT_FILES | grep 'failure' | sed -n 's/.*name="\([^"]*\)".*/\1/p' | tr '\n' ', ')
 
           echo "PASS_COUNT=$PASS_COUNT" >> $GITHUB_ENV
           echo "FAIL_COUNT=$FAIL_COUNT" >> $GITHUB_ENV
