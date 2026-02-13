@@ -53,8 +53,15 @@ public class AddEmployeeTest extends BaseAuthenticatedTest {
 
         AddEmployeeResponse body = response.getResponseBody();
 
-        Assert.assertNull(body.data);
-        Assert.assertNotNull(body.errors);
+        Assert.assertNull(
+                body.data,
+                "Employee tetap dibuat padahal email tidak valid"
+        );
+
+        Assert.assertNotNull(
+                body.errors,
+                "Error seharusnya muncul ketika email invalid"
+        );
     }
 
     @Test
