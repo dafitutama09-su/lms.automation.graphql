@@ -6,6 +6,7 @@ import qa.models.responses.employee.UpdateEmployeeResponse;
 import qa.services.employee.UpdateEmployeeService;
 import qa.tests.BaseAuthenticatedTest;
 import qa.utils.ApiResponse;
+import qa.utils.FakerDataGenerator;
 
 public class UpdateEmployeeTest extends BaseAuthenticatedTest {
 
@@ -28,12 +29,12 @@ public class UpdateEmployeeTest extends BaseAuthenticatedTest {
 
         ApiResponse<UpdateEmployeeResponse> response =
                 UpdateEmployeeService.updateEmployee(
+                        "62b0eea6-4375-442c-8688-4a361725ca20",
                         "",
                         "",
                         "",
-                        null,
-                        "d0f0bc45-26ac-44f8-b2ac-826281750cbf",
-                        "student",
+                        "null",
+                        "43b462d2-e360-46e2-b6bd-73b3f5fb0721",
                         "student"
                 );
 
