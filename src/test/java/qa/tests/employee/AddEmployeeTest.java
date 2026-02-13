@@ -33,10 +33,9 @@ public class AddEmployeeTest extends BaseAuthenticatedTest {
                 );
 
         AddEmployeeResponse body = response.getResponseBody();
-        Assert.assertNull(body.data,
-                "Employee tetap dibuat padahal role kosong"
-        );
 
+        Assert.assertNull(body.data, "Data harus null");
+        Assert.assertNotNull(body.errors, "Errors harus ada");
     }
 
     @Test
@@ -52,13 +51,10 @@ public class AddEmployeeTest extends BaseAuthenticatedTest {
                         "Mentor"
                 );
 
-        AddEmployeeResponse responseBody =
-                response.getResponseBody();
+        AddEmployeeResponse body = response.getResponseBody();
 
-        Assert.assertNull(
-                responseBody.data,
-                "Employee tetap dibuat padahal email tidak valid"
-        );
+        Assert.assertNull(body.data);
+        Assert.assertNotNull(body.errors);
     }
 
     @Test
@@ -74,12 +70,11 @@ public class AddEmployeeTest extends BaseAuthenticatedTest {
                         "Mentor"
                 );
 
-        AddEmployeeResponse responseBody =
-                response.getResponseBody();
+        AddEmployeeResponse body = response.getResponseBody();
 
-        Assert.assertNull(
-                responseBody.data.createEmployee.id,
-                "Employee tetap dibuat padahal data sudah ada"
+        Assert.assertNull(body.data);
+        Assert.assertTrue(
+                body.errors.get(0).message.contains("already registered")
         );
     }
 
@@ -98,9 +93,7 @@ public class AddEmployeeTest extends BaseAuthenticatedTest {
 
         AddEmployeeResponse body = response.getResponseBody();
 
-        Assert.assertNull(
-                body.data.createEmployee.id,
-                "Employee tetap dibuat padahal nomor phone tidak valid"
-        );
+        Assert.assertNull(body.data);
+        Assert.assertNotNull(body.errors);
     }
 }
