@@ -42,12 +42,9 @@ jobs:
         if: always()
         run: |
           RESULT_FILE=$(find . -name "testng-results.xml" | head -1)
-
           PASS_COUNT=$(grep -o 'status="PASS"' $RESULT_FILE | wc -l)
           FAIL_COUNT=$(grep -o 'status="FAIL"' $RESULT_FILE | wc -l)
-
           FAIL_TESTS=$(grep 'status="FAIL"' $RESULT_FILE | sed -n 's/.*name="\([^"]*\)".*/\1/p' | tr '\n' ',')
-
           echo "PASS_COUNT=$PASS_COUNT" >> $GITHUB_ENV
           echo "FAIL_COUNT=$FAIL_COUNT" >> $GITHUB_ENV
           echo "FAIL_TESTS=$FAIL_TESTS" >> $GITHUB_ENV
@@ -63,17 +60,8 @@ jobs:
           RUN_ID="${{ github.run_id }}"
           REPORT_URL="https://github.com/$REPO/actions/runs/$RUN_ID"
 
-          MESSAGE="API Automation CI Result
-Status : $STATUS
-PASS : $PASS_COUNT
-FAIL : $FAIL_COUNT
+          MESSAGE="API Automation CI Result\nStatus : $STATUS\nPASS : $PASS_COUNT\nFAIL : $FAIL_COUNT\n\nFailed Tests :\n$FAIL_TESTS\n\nReport :\n$REPORT_URL"
 
-Failed Tests :
-  $FAIL_TESTS
-
-Report :
-  $REPORT_URL"
-  
-  curl -s -X POST https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage \
-  -d chat_id=$TELEGRAM_CHAT_ID \
-  -d text="$MESSAGE"
+          curl -s -X POST https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage \
+            -d chat_id=$TELEGRAM_CHAT_ID \
+            -d text="$MESSAGE"
