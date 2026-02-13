@@ -75,8 +75,9 @@ jobs:
             RESULT_STATUS="SUCCESS"
           fi
 
-          MESSAGE="📊 API Automation CI Result\n\nResult : $RESULT_STATUS\nPASS : $PASS_COUNT\nFAIL : $FAIL_COUNT\n\nFailed Tests :\n$FAIL_TESTS\n\nReport :\n$REPORT_URL"
+          MESSAGE=$(printf "📊 API Automation CI Result\n\nResult : %s\nPASS : %s\nFAIL : %s\n\nFailed Tests :\n%s\n\nReport :\n%s" \
+            "$RESULT_STATUS" "$PASS_COUNT" "$FAIL_COUNT" "$FAIL_TESTS" "$REPORT_URL")
 
           curl -s -X POST https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage \
-            -d chat_id=$TELEGRAM_CHAT_ID \
+            --data-urlencode chat_id=$TELEGRAM_CHAT_ID \
             --data-urlencode text="$MESSAGE"
