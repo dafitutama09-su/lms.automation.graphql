@@ -25,3 +25,53 @@ jobs:
 
       - name: Run API Tests
         run: ./gradlew clean test
+        env:
+          DEBUG: ${{ secrets.DEBUG }}
+          BASE_URL: ${{ secrets.BASE_URL }}
+          EMAIL: ${{ secrets.EMAIL }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          COMPANY_ID: ${{ secrets.COMPANY_ID }}
+
+      - name: Upload Test Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: build/reports/tests/test
+
+      - name: Extract Test Results
+        if: always()
+        run: |
+          RESULT_FILE=$(find . -name "testng-results.xml" | head -1)
+
+          PASS_COUNT=$(grep -o 'status="PASS"' $RESULT_FILE | wc -l)
+          FAIL_COUNT=$(grep -o 'status="FAIL"' $RESULT_FILE | wc -l)
+
+          FAIL_TESTS=$(grep 'status="FAIL"' $RESULT_FILE | sed -n 's/.*name="\([^"]*\)".*/\1/p' | tr '\n' ',')
+
+          echo "PASS_COUNT=$PASS_COUNT" >> $GITHUB_ENV
+          echo "FAIL_COUNT=$FAIL_COUNT" >> $GITHUB_ENV
+          echo "FAIL_TESTS=$FAIL_TESTS" >> $GITHUB_ENV
+
+      - name: Send Telegram Notification
+        if: always()
+        run: |
+          STATUS="${{ job.status }}"
+          REPO="${{ github.repository }}"
+          RUN_ID="${{ github.run_id }}"
+          REPORT_URL="https://github.com/$REPO/actions/runs/$RUN_ID"
+
+          MESSAGE="📊 API Automation CI Result
+
+Status : $STATUS
+PASS : $PASS_COUNT
+FAIL : $FAIL_COUNT
+
+Failed Tests :
+  $FAIL_TESTS
+
+Report :
+  $REPORT_URL"
+  
+  curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+  -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+  -d text="$MESSAGE"
