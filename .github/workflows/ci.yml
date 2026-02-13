@@ -44,9 +44,14 @@ jobs:
         if: always()
         run: |
           RESULT_FILE=$(find . -name "testng-results.xml" | head -1)
+
           PASS_COUNT=$(grep -o 'status="PASS"' $RESULT_FILE | wc -l)
           FAIL_COUNT=$(grep -o 'status="FAIL"' $RESULT_FILE | wc -l)
-          FAIL_TESTS=$(grep 'status="FAIL"' $RESULT_FILE | sed -n 's/.*name="\([^"]*\)".*/\1/p' | tr '\n' ', ')
+
+          FAIL_TESTS=$(grep 'status="FAIL"' $RESULT_FILE \
+            | sed -n 's/.*name="\([^"]*\)".*/\1/p' \
+            | tr '\n' ', ')
+
           echo "PASS_COUNT=$PASS_COUNT" >> $GITHUB_ENV
           echo "FAIL_COUNT=$FAIL_COUNT" >> $GITHUB_ENV
           echo "FAIL_TESTS=$FAIL_TESTS" >> $GITHUB_ENV
@@ -54,18 +59,23 @@ jobs:
       - name: Send Telegram Notification
         if: always()
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TTELEGRAM_BOT_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          STATUS="${{ job.status }}"
           REPO="${{ github.repository }}"
           RUN_ID="${{ github.run_id }}"
           REPORT_URL="https://github.com/$REPO/actions/runs/$RUN_ID"
 
+          if [ "$FAIL_COUNT" -gt 0 ]; then
+            RESULT_STATUS="FAILED"
+          else
+            RESULT_STATUS="SUCCESS"
+          fi
+
           MESSAGE=$(cat <<EOF
           📊 API Automation CI Result
 
-Status : $STATUS
+Result : $RESULT_STATUS
 PASS : $PASS_COUNT
 FAIL : $FAIL_COUNT
 
