@@ -34,12 +34,10 @@ public class AddEmployeeTest extends BaseAuthenticatedTest {
 
         AddEmployeeResponse body = response.getResponseBody();
 
-        if (body.data != null && body.data.createEmployee != null) {
-            System.out.println("BUG: employeeRole null masih bisa dibuat");
-            return;
-        }
-
-        Assert.assertNull(body.data);
+        Assert.assertNull(
+                body.data,
+                "BUG: employeeRole null masih bisa dibuat"
+        );
     }
 
     @Test
@@ -57,12 +55,10 @@ public class AddEmployeeTest extends BaseAuthenticatedTest {
 
         AddEmployeeResponse body = response.getResponseBody();
 
-        if (body.data != null && body.data.createEmployee != null) {
-            System.out.println("BUG: email invalid masih bisa dibuat");
-            return;
-        }
-
-        Assert.assertNull(body.data);
+        Assert.assertNull(
+                body.data,
+                "BUG: email invalid masih bisa dibuat"
+        );
     }
 
     @Test
@@ -101,11 +97,9 @@ public class AddEmployeeTest extends BaseAuthenticatedTest {
 
         AddEmployeeResponse body = response.getResponseBody();
 
-        if (body.data != null && body.data.createEmployee != null) {
-            System.out.println("BUG: phone invalid masih bisa dibuat");
-            return;
-        }
-
-        Assert.assertNull(body.data);
+        Assert.assertNull(
+                body.data,
+                "BUG: phone invalid masih bisa dibuat"
+        );
     }
 }

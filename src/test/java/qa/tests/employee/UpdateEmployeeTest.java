@@ -39,11 +39,9 @@ public class UpdateEmployeeTest extends BaseAuthenticatedTest {
 
         UpdateEmployeeResponse body = response.getResponseBody();
 
-        if (body.data != null && body.data.updateEmployee != null) {
-            System.out.println("BUG: phoneNumber null masih bisa update");
-            return;
-        }
-
-        Assert.assertNull(body.data);
+        Assert.assertNull(
+                body.data,
+                "BUG: phoneNumber null masih bisa update"
+        );
     }
 }
