@@ -43,21 +43,16 @@ jobs:
       - name: Extract Test Results
         if: always()
         run: |
-          RESULT_FILE=$(find build -name "testng-results.xml" | head -1)
-
-          echo "Result file: $RESULT_FILE"
+          RESULT_FILE=$(find . -name "testng-results.xml" | head -1)
 
           if [ -f "$RESULT_FILE" ]; then
             PASS_COUNT=$(grep -o 'status="PASS"' $RESULT_FILE | wc -l)
             FAIL_COUNT=$(grep -o 'status="FAIL"' $RESULT_FILE | wc -l)
-
-            FAIL_TESTS=$(grep 'status="FAIL"' $RESULT_FILE \
-              | sed -n 's/.*name="\([^"]*\)".*/\1/p' \
-              | tr '\n' ', ')
+            FAIL_TESTS=$(grep 'status="FAIL"' $RESULT_FILE | sed -n 's/.*name="\([^"]*\)".*/\1/p' | tr '\n' ', ')
           else
             PASS_COUNT=0
             FAIL_COUNT=0
-            FAIL_TESTS=""
+            FAIL_TESTS="No results file found"
           fi
 
           echo "PASS_COUNT=$PASS_COUNT" >> $GITHUB_ENV
@@ -80,8 +75,7 @@ jobs:
             RESULT_STATUS="SUCCESS"
           fi
 
-          MESSAGE=$(cat <<EOF
-          📊 API Automation CI Result
+          MESSAGE="📊 API Automation CI Result
 
 Result : $RESULT_STATUS
 PASS : $PASS_COUNT
@@ -91,10 +85,8 @@ Failed Tests :
   $FAIL_TESTS
 
 Report :
-  $REPORT_URL
-  EOF
-  )
+  $REPORT_URL"
   
   curl -s -X POST https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage \
   -d chat_id=$TELEGRAM_CHAT_ID \
-  -d text="$MESSAGE"
+  --data-urlencode text="$MESSAGE"
